@@ -1,0 +1,15 @@
+Latency Reduction (Ping):
+
+    TcpAckFrequency and TCPNoDelay lower communication delays, reducing ping.
+
+Stability:
+
+    TcpTimedWaitDelay and MaxUserPort ensure a stable connection by optimizing how ports are handled.
+
+Throughput:
+
+    NetworkThrottlingIndex and TcpMaxDataRetransmissions maximize network speed and minimize disruptions.
+
+System Optimization:
+
+    SystemResponsiveness, GPU Priority, and Priority ensure your PC allocates the most resources to your games

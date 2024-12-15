@@ -1,0 +1,25 @@
+Windows Registry Editor Version 5.00
+
+; Disable Nagle's Algorithm
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\{Your-Network-Adapter-GUID}]
+"TcpAckFrequency"=dword:00000001 ; Decimal: 1
+"TCPNoDelay"=dword:00000001 ; Decimal: 1
+
+; Optimize TCP Time Wait Delay
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters]
+"TcpTimedWaitDelay"=dword:0000001e ; Decimal: 30
+"MaxUserPort"=dword:0000fffe ; Decimal: 65534
+"TcpMaxDataRetransmissions"=dword:00000005 ; Decimal: 5
+
+; Disable Network Throttling
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile]
+"NetworkThrottlingIndex"=dword:ffffffff ; Decimal: -1 (disabled)
+
+; Optimize System Responsiveness
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile]
+"SystemResponsiveness"=dword:00000000 ; Decimal: 0
+
+; Enable Gaming Mode for CPU Priority
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games]
+"GPU Priority"=dword:00000008 ; Decimal: 8
+"Priority"=dword:00000006 ; Decimal: 6
