@@ -2,6 +2,8 @@ import winreg
 import socket
 from colorama import Fore, init
 import os
+import time
+
 def banner():
     print(fr'''{cyan}
  ▄▄▄       ██▓███   ██ ▄█▀▄▄▄       ██▓    ▓█████   ██████   ██████ 
@@ -19,11 +21,8 @@ def banner():
                         {cyan}Welcome To {pink}Networking Tweaks For Online Gaming
 
                         {cyan}Visit My Profiles At: 
-
                         {cyan}Github: {pink}github.com/apkaless
-
                         {cyan}Instagram: {pink}instagram.com/apkaless
-
                         {cyan}Credits To {pink}Apkaless
 ''')
     
@@ -58,7 +57,7 @@ def DisableNaglesAlg(ipv4):
         current_interface_path = f'{active_interface_subkey}\\{interface}'
         current_interface_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, current_interface_path, 0 , winreg.KEY_ALL_ACCESS)
         values_count = winreg.QueryInfoKey(current_interface_key)[1]
-        for i in range(values_count):
+        for i in range(0, values_count):
             vname, vdata, vtype = winreg.EnumValue(current_interface_key, i)
             if vdata == ipv4:
                 try:
@@ -107,10 +106,16 @@ def GetCurrentIPV4():
 
 
 def main():
+    input(f'{green}..............................[HIT ENTER TO START THE PROCESS]..............................')
+    time.sleep(1)
     SetGPUCPUPriority(8, 6)
+    time.sleep(0.1)
     DisableNaglesAlg(GetCurrentIPV4())
+    time.sleep(0.3)
     DisableNetworkThrottling()
+    time.sleep(0.6)
     TcpOptimization()
+    time.sleep(0.9)
 
     input('\n.............................................')
 
@@ -121,5 +126,4 @@ if __name__ == '__main__':
     cyan = Fore.CYAN
     pink = Fore.LIGHTMAGENTA_EX
     banner()
-    input(f'{green}..............................[HIT ENTER TO START THE PROCESS]..............................')
     main()
