@@ -44,14 +44,12 @@ def SetGPUCPUPriority(gp: int, cp: int):
     
 def DisableNaglesAlg(ipv4):
     active_interface_subkey = r'SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces'
-
     try:
         interfaces = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, active_interface_subkey, 0, winreg.KEY_ALL_ACCESS)
     except:
         print(f'\n{red}Error: Can\'t Disable Nagle\'s Algorithm')
         return False
     total_interfaces = winreg.QueryInfoKey(interfaces)[0]
-
     for i in range(0, total_interfaces):
         interface = winreg.EnumKey(interfaces, i)
         current_interface_path = f'{active_interface_subkey}\\{interface}'
@@ -68,9 +66,10 @@ def DisableNaglesAlg(ipv4):
                 except:
                     print(f'\n{red}Error: Can\'t Disable Nagle\'s Algorithm')
                     return False
-        else:
-            print(f'\n{red}[-] Error: No Active Interface Detected.')
-        return True
+    else:
+        print(f'\n{red}[-] Error: No Active Interface Detected.')
+
+    return True
 
 def DisableNetworkThrottling():
     sub_key = r'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile'
