@@ -41,7 +41,7 @@ def SetGPUCPUPriority(gp: int, cp: int):
     try:
         winreg.SetValueEx(Games_reg, 'GPU Priority', 0, winreg.REG_DWORD, gp)
         winreg.SetValueEx(Games_reg, 'Priority', 0, winreg.REG_DWORD, cp)
-        print(f'{bold}{cyan}\n[+] GPU & CPU\'s Priority Has Been Set For Gaming')
+        print(f'{bold}{cyan}\n[+] GPU & CPU\'s Priority Has Been Set For {pink}Gaming')
         return True
     except:
         print(f'\n{bold}{red}[-] Error: Cannot Set Data')
@@ -96,7 +96,7 @@ def TcpOptimization():
         winreg.SetValueEx(full_key, 'TcpTimedWaitDelay', 0, winreg.REG_DWORD, 30)
         winreg.SetValueEx(full_key, 'MaxUserPort', 0, winreg.REG_DWORD, 65534)
         winreg.SetValueEx(full_key, 'TcpMaxDataRetransmissions', 0, winreg.REG_DWORD, 5)
-        print(f'\n{bold}{cyan}[+] TCP Optimization Successful:\n\n\tTcpTimedWaitDelay Set To -> {pink}30\n\tMaxUserPort Set To -> {pink}65534\n\tTcpMaxDataRetransmissions Set To -> {pink}5\n')
+        print(f'\n{bold}{cyan}[+] TCP Optimization Successful:\n\n\tTcpTimedWaitDelay Set To -> {pink}30\n\t{cyan}MaxUserPort Set To -> {pink}65534\n\t{cyan}TcpMaxDataRetransmissions Set To -> {pink}5\n')
     except:
         print(f'\n{bold}{red}Error While Optimizing TCP.')
         return False
