@@ -109,6 +109,17 @@ def GetAdapterName(subkey):
         if 'DriverDesc' in vname:
             return vdata
 
+def GetMaxSpeed(full_key):
+    res = subprocess.check_output(fr'reg query {full_key}\Ndi\params\*SpeedDuplex\enum', shell=True)
+    decoded_res = res.decode().strip()
+    key = re.search(r'HKEY_LOCAL_MACHINE\\.+', decoded_res).group()
+    clean_res = decoded_res.strip(key)
+    final_res = clean_res.strip()
+    string_numbers = re.findall(r'\d+', final_res)
+    int_numbers = list(map(int, string_numbers))
+    int_numbers.sort()
+    return int_numbers[-1]
+
 def OptimizeActiveAdapter(transportName):
     sub_key = r'SYSTEM\CurrentControlSet\Control\Class\{4d36e972-e325-11ce-bfc1-08002be10318}'
     main_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, sub_key, 0, winreg.KEY_ALL_ACCESS)
@@ -142,30 +153,15 @@ def OptimizeActiveAdapter(transportName):
             random_times = [0.1, 0.2, 0.3, 0.01]
 
             for i in range(0, values_count):
-                if transportName in winreg.EnumValue(full_main_key,i):
-                    adapter_name = GetAdapterName(full_sub_key)
-                    try:
-                        winreg.SetValueEx(full_main_key, '*WakeOnMagicPacket', 0, winreg.REG_SZ, 0)
-                        winreg.SetValueEx(full_main_key, '*WakeOnPattern', 0, winreg.REG_SZ, 0)
-                        winreg.SetValueEx(full_main_key, 'WolShutdownLinkSpeed', 0, winreg.REG_SZ, 2)
-                        winreg.SetValueEx(full_main_key, 'TxIntDelay', 0, winreg.REG_SZ, 0)
-                        winreg.SetValueEx(full_main_key, 'TxAbsIntDelay', 0, winreg.REG_SZ, 0)
-                        winreg.SetValueEx(full_main_key, 'RxIntDelay', 0, winreg.REG_SZ, 0)
-                        winreg.SetValueEx(full_main_key, 'RxAbsIntDelay', 0, winreg.REG_SZ, 0)
-                        winreg.SetValueEx(full_main_key, 'PowerSavingMode', 0, winreg.REG_SZ, 0)
-                        winreg.SetValueEx(full_main_key, '*LsoV2IPv4', 0, winreg.REG_SZ, 0)
-                        winreg.SetValueEx(full_main_key, '*LsoV2IPv6', 0, winreg.REG_SZ, 0)
-                        winreg.SetValueEx(full_main_key, '*InterruptModeration', 0, winreg.REG_SZ, 0)
-                        winreg.SetValueEx(full_main_key, '*FlowControl', 0, winreg.REG_SZ, 3)
-                        winreg.SetValueEx(full_main_key, '*EEE', 0, winreg.REG_SZ, 0)
-                        winreg.SetValueEx(full_main_key, '*SpeedDuplex', 0, winreg.REG_SZ, 2500)
-                        winreg.SetValueEx(full_main_key, '*TCPChecksumOffloadIPv4', 0, winreg.REG_SZ, 3)
-                        winreg.SetValueEx(full_main_key, '*TCPChecksumOffloadIPv6', 0, winreg.REG_SZ, 3)
-                        winreg.SetValueEx(full_main_key, '*UDPChecksumOffloadIPv4', 0, winreg.REG_SZ, 3)
-                        winreg.SetValueEx(full_main_key, '*UDPChecksumOffloadIPv6', 0, winreg.REG_SZ, 3)
-                        winreg.SetValueEx(full_main_key, 'AdvancedEEE', 0, winreg.REG_SZ, 0)
-                    except:
-                        pass
+                try:
+                    if transportName in winreg.EnumValue(full_main_key,i):
+                        adapter_name = GetAdapterName(full_sub_key)
+                        full_main_key = f'HKEY_LOCAL_MACHINE\\{full_sub_key}'
+                        max_speed = GetMaxSpeed(full_main_key)
+                        subprocess.run(fr'reg add {full_main_key} /v AdvancedEEE /t REG_SZ /d 0 /f && reg add {full_main_key} /v *EEE /t REG_SZ /d 0 /f && reg add {full_main_key} /v *FlowControl /t REG_SZ /d 3 /f && reg add {full_main_key} /v *InterruptModeration /t REG_SZ /d 0 /f && reg add {full_main_key} /v *LsoV2IPv6 /t REG_SZ /d 0 /f && reg add {full_main_key} /v *LsoV2IPv4 /t REG_SZ /d 0 /f && reg add {full_main_key} /v PowerSavingMode /t REG_SZ /d 0 /f && reg add {full_main_key} /v RxAbsIntDelay /t REG_SZ /d 0 /f && reg add {full_main_key} /v RxIntDelay /t REG_SZ /d 0 /f && reg add {full_main_key} /v TxAbsIntDelay /t REG_SZ /d 0 /f && reg add {full_main_key} /v TxIntDelay /t REG_SZ /d 0 /f && reg add {full_main_key} /v *WakeOnPattern /t REG_SZ /d 0 /f && reg add {full_main_key} /v *WakeOnMagicPacket /t REG_SZ /d 0 /f && reg add {full_main_key} /v *SpeedDuplex /t REG_SZ /d {max_speed} /f && reg add {full_main_key} /v *TCPChecksumOffloadIPv4 /t REG_SZ /d 3 /f && reg add {full_main_key} /v *TCPChecksumOffloadIPv6 /t REG_SZ /d 3 /f && reg add {full_main_key} /v *UDPChecksumOffloadIPv4 /t REG_SZ /d 3 /f && reg add {full_main_key} /v *UDPChecksumOffloadIPv6 /t REG_SZ /d 3 /f && reg add {full_main_key} /v WolShutdownLinkSpeed /t REG_SZ /d 2 /f', shell=True, text=True, stdout=subprocess.PIPE)
+                except:
+                    pass
+
         except:
             pass
         
