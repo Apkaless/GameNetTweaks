@@ -141,13 +141,11 @@ def OptimizeActiveAdapter(transportName):
                 ('*LsoV2IPv4', 0),
                 ('*LsoV2IPv6', 0),
                 ('*InterruptModeration', 0),
-                ('*FlowControl', 3),
                 ('*EEE', 0),
                 ('*TCPChecksumOffloadIPv4', 3),
                 ('*TCPChecksumOffloadIPv6', 3),
                 ('*UDPChecksumOffloadIPv4', 3),
                 ('*UDPChecksumOffloadIPv6', 3),
-                ('AdvancedEEE', 0)
             ]
             random_times = [0.1, 0.2, 0.3, 0.01]
 
@@ -158,7 +156,7 @@ def OptimizeActiveAdapter(transportName):
                         full_main_key = f'HKEY_LOCAL_MACHINE\\{full_sub_key}'
                         max_speed = GetMaxSpeed(full_main_key)
                         registry_values.append(('*SpeedDuplex', str(max_speed)))
-                        subprocess.run(fr'reg add {full_main_key} /v AdvancedEEE /t REG_SZ /d 0 /f && reg add {full_main_key} /v *EEE /t REG_SZ /d 0 /f && reg add {full_main_key} /v *FlowControl /t REG_SZ /d 3 /f && reg add {full_main_key} /v *InterruptModeration /t REG_SZ /d 0 /f && reg add {full_main_key} /v *LsoV2IPv6 /t REG_SZ /d 0 /f && reg add {full_main_key} /v *LsoV2IPv4 /t REG_SZ /d 0 /f && reg add {full_main_key} /v PowerSavingMode /t REG_SZ /d 0 /f && reg add {full_main_key} /v RxAbsIntDelay /t REG_SZ /d 0 /f && reg add {full_main_key} /v RxIntDelay /t REG_SZ /d 0 /f && reg add {full_main_key} /v TxAbsIntDelay /t REG_SZ /d 0 /f && reg add {full_main_key} /v TxIntDelay /t REG_SZ /d 0 /f && reg add {full_main_key} /v *WakeOnPattern /t REG_SZ /d 0 /f && reg add {full_main_key} /v *WakeOnMagicPacket /t REG_SZ /d 0 /f && reg add {full_main_key} /v *SpeedDuplex /t REG_SZ /d {max_speed} /f && reg add {full_main_key} /v *TCPChecksumOffloadIPv4 /t REG_SZ /d 3 /f && reg add {full_main_key} /v *TCPChecksumOffloadIPv6 /t REG_SZ /d 3 /f && reg add {full_main_key} /v *UDPChecksumOffloadIPv4 /t REG_SZ /d 3 /f && reg add {full_main_key} /v *UDPChecksumOffloadIPv6 /t REG_SZ /d 3 /f && reg add {full_main_key} /v WolShutdownLinkSpeed /t REG_SZ /d 2 /f', shell=True, text=True, stdout=subprocess.PIPE)
+                        subprocess.run(fr'reg add {full_main_key} /v *EEE /t REG_SZ /d 0 /f && reg add {full_main_key} /v *InterruptModeration /t REG_SZ /d 0 /f && reg add {full_main_key} /v *LsoV2IPv6 /t REG_SZ /d 0 /f && reg add {full_main_key} /v *LsoV2IPv4 /t REG_SZ /d 0 /f && reg add {full_main_key} /v PowerSavingMode /t REG_SZ /d 0 /f && reg add {full_main_key} /v RxAbsIntDelay /t REG_SZ /d 0 /f && reg add {full_main_key} /v RxIntDelay /t REG_SZ /d 0 /f && reg add {full_main_key} /v TxAbsIntDelay /t REG_SZ /d 0 /f && reg add {full_main_key} /v TxIntDelay /t REG_SZ /d 0 /f && reg add {full_main_key} /v *WakeOnPattern /t REG_SZ /d 0 /f && reg add {full_main_key} /v *WakeOnMagicPacket /t REG_SZ /d 0 /f && reg add {full_main_key} /v *SpeedDuplex /t REG_SZ /d {max_speed} /f && reg add {full_main_key} /v *TCPChecksumOffloadIPv4 /t REG_SZ /d 3 /f && reg add {full_main_key} /v *TCPChecksumOffloadIPv6 /t REG_SZ /d 3 /f && reg add {full_main_key} /v *UDPChecksumOffloadIPv4 /t REG_SZ /d 3 /f && reg add {full_main_key} /v *UDPChecksumOffloadIPv6 /t REG_SZ /d 3 /f && reg add {full_main_key} /v WolShutdownLinkSpeed /t REG_SZ /d 2 /f', shell=True, text=True, stdout=subprocess.PIPE)
                 except:
                     pass
         except:
