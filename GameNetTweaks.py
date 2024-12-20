@@ -128,22 +128,30 @@ def OptimizeActiveAdapter(transportName):
             full_main_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, full_sub_key, 0, winreg.KEY_ALL_ACCESS)
             values_count = winreg.QueryInfoKey(full_main_key)[1]
             registry_values = [
-                ('*WakeOnMagicPacket', 0),
-                ('*WakeOnPattern', 0),
-                ('WolShutdownLinkSpeed', 2),
-                ('TxIntDelay', 0),
-                ('TxAbsIntDelay', 0),
-                ('RxIntDelay', 0),
-                ('RxAbsIntDelay', 0),
-                ('PowerSavingMode', 0),
-                ('*LsoV2IPv4', 0),
-                ('*LsoV2IPv6', 0),
-                ('*InterruptModeration', 0),
-                ('*EEE', 0),
-                ('*TCPChecksumOffloadIPv4', 3),
-                ('*TCPChecksumOffloadIPv6', 3),
-                ('*UDPChecksumOffloadIPv4', 3),
-                ('*UDPChecksumOffloadIPv6', 3),
+                ('*WakeOnMagicPacket', 'REG_SZ',0),
+                ('*WakeOnPattern', 'REG_SZ',0),
+                ('WolShutdownLinkSpeed', 'REG_SZ',2),
+                ('TxIntDelay', 'REG_SZ',0),
+                ('TxAbsIntDelay', 'REG_SZ',0),
+                ('RxIntDelay', 'REG_SZ',0),
+                ('RxAbsIntDelay', 'REG_SZ',0),
+                ('PowerSavingMode', 'REG_SZ',0),
+                ('*LsoV2IPv4', 'REG_SZ',0),
+                ('*LsoV2IPv6', 'REG_SZ',0),
+                ('*InterruptModeration', 'REG_SZ',0),
+                ('*EEE', 'REG_SZ',0),
+                ('*TCPChecksumOffloadIPv4', 'REG_SZ', 3),
+                ('*TCPChecksumOffloadIPv6', 'REG_SZ',3),
+                ('*UDPChecksumOffloadIPv4', 'REG_SZ',3),
+                ('*UDPChecksumOffloadIPv6', 'REG_SZ',3),
+                ('*ReceiveBuffers', 'REG_SZ', 2048),
+                ('*TransmitBuffers', 'REG_SZ', 4096),
+                ('*FlowControl', 'REG_SZ', 0),
+                ('*RSS', 'REG_SZ', 1),
+                ('RSS', 'REG_SZ', 1),
+                ('RSSProfile', 'REG_SZ', 3),
+                ('*MaxRssProcessors', 'REG_SZ', 4),
+                ('FlowControlCap', 'REG_SZ', 0)
             ]
             random_times = [0.1, 0.2, 0.3, 0.01]
 
@@ -153,22 +161,39 @@ def OptimizeActiveAdapter(transportName):
                         adapter_name = GetAdapterName(full_sub_key)
                         full_main_key = f'HKEY_LOCAL_MACHINE\\{full_sub_key}'
                         max_speed = GetMaxSpeed(full_main_key)
-                        registry_values.append(('*SpeedDuplex', str(max_speed)))
-                        subprocess.run(fr'reg add {full_main_key} /v *EEE /t REG_SZ /d 0 /f && reg add {full_main_key} /v *InterruptModeration /t REG_SZ /d 0 /f && reg add {full_main_key} /v *LsoV2IPv6 /t REG_SZ /d 0 /f && reg add {full_main_key} /v *LsoV2IPv4 /t REG_SZ /d 0 /f && reg add {full_main_key} /v PowerSavingMode /t REG_SZ /d 0 /f && reg add {full_main_key} /v RxAbsIntDelay /t REG_SZ /d 0 /f && reg add {full_main_key} /v RxIntDelay /t REG_SZ /d 0 /f && reg add {full_main_key} /v TxAbsIntDelay /t REG_SZ /d 0 /f && reg add {full_main_key} /v TxIntDelay /t REG_SZ /d 0 /f && reg add {full_main_key} /v *WakeOnPattern /t REG_SZ /d 0 /f && reg add {full_main_key} /v *WakeOnMagicPacket /t REG_SZ /d 0 /f && reg add {full_main_key} /v *SpeedDuplex /t REG_SZ /d {max_speed} /f && reg add {full_main_key} /v *TCPChecksumOffloadIPv4 /t REG_SZ /d 3 /f && reg add {full_main_key} /v *TCPChecksumOffloadIPv6 /t REG_SZ /d 3 /f && reg add {full_main_key} /v *UDPChecksumOffloadIPv4 /t REG_SZ /d 3 /f && reg add {full_main_key} /v *UDPChecksumOffloadIPv6 /t REG_SZ /d 3 /f && reg add {full_main_key} /v WolShutdownLinkSpeed /t REG_SZ /d 2 /f', shell=True, text=True, stdout=subprocess.PIPE)
+                        registry_values.append(('*SpeedDuplex', 'REG_SZ', max_speed))
+                        for reg_key, dtype, reg_value in registry_values:
+                            subprocess.run(fr'reg add {full_main_key} /v {reg_key} /t {dtype} /d {reg_value} /f', shell=True, text=True, stdout=subprocess.PIPE)
                 except:
                     pass
         except:
             pass
         
     print(f'{bold}{cyan}[+] {adapter_name}:\n')    
-    for value_name, value_data in registry_values:
+    for value_name, dtype, value_data in registry_values:
         print(f"\t{bold}{cyan}[+] {value_name} Set --> {pink}{value_data}")
         time.sleep(random.choice(random_times))
 
 def EliminateBufferBloat():
-    command = 'PowerShell.exe Set-NetTCPSetting -SettingName internet -AutoTuningLevelLocal disabled'
-    subprocess.run(command, shell=True, stdout=subprocess.PIPE, text=True)
+    commands = ['PowerShell.exe Set-NetTCPSetting -SettingName internet -AutoTuningLevelLocal disabled', 'PowerShell.exe Set-NetOffloadGlobalSetting -ReceiveSegmentCoalescing disabled',
+'PowerShell.exe Set-NetOffloadGlobalSetting -ReceiveSideScaling disabled',
+'PowerShell.exe Set-NetOffloadGlobalSetting -Chimney disabled',
+'PowerShell.exe Disable-NetAdapterLso -Name *',
+'PowerShell.exe Disable-NetAdapterChecksumOffload -Name *']
+    
+    for command in commands:
+        subprocess.run(command, shell=True, stdout=subprocess.PIPE, text=True)
+    
     print(f"\t{bold}{cyan}[+] AutoTuningLevelLocal Set --> {pink}Disabled")
+    time.sleep(0.1)
+    print(f"\t{bold}{cyan}[+] ReceiveSegmentCoalescing Set --> {pink}Disabled")
+    time.sleep(0.3)
+    print(f"\t{bold}{cyan}[+] ReceiveSideScaling Set --> {pink}Disabled")
+    print(f"\t{bold}{cyan}[+] Chimney Set --> {pink}Disabled")
+    time.sleep(0.2)
+    print(f"\t{bold}{cyan}[+] NetAdapterLso Set --> {pink}Disabled")
+    print(f"\t{bold}{cyan}[+] NetAdapterChecksumOffload Set --> {pink}Disabled")
+    time.sleep(0.2)
     return True
 
 def GetMacAddress():
