@@ -28,8 +28,6 @@ def banner():
 {reset}""")
 
 
-
-
     
 def SetGPUCPUPriority(gp: int, cp: int):
     Games_subKey = r'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games'
@@ -167,6 +165,12 @@ def OptimizeActiveAdapter(transportName):
         print(f"\t{bold}{cyan}[+] {value_name} Set --> {pink}{value_data}")
         time.sleep(random.choice(random_times))
 
+def EliminateBufferBloat():
+    command = 'PowerShell.exe Set-NetTCPSetting -SettingName internet -AutoTuningLevelLocal disabled'
+    subprocess.run(command, shell=True, stdout=subprocess.PIPE, text=True)
+    print(f"\t{bold}{cyan}[+] AutoTuningLevelLocal Set --> {pink}Disabled")
+    return True
+
 def GetMacAddress():
     current_ip = GetCurrentIPV4()
     for iface_name, iface_details in psutil.net_if_addrs().items():
@@ -212,6 +216,8 @@ def main():
     time.sleep(0.9)
     OptimizeActiveAdapter(GetTransName(GetMacAddress()[1]))
     time.sleep(0.5)
+    EliminateBufferBloat()
+    time.sleep(0.2)
     input('\n.............................................')
 
 if __name__ == '__main__':
