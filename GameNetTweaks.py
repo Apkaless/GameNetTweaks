@@ -94,11 +94,27 @@ def TcpOptimization():
         winreg.SetValueEx(full_key, 'TcpTimedWaitDelay', 0, winreg.REG_DWORD, 30)
         winreg.SetValueEx(full_key, 'MaxUserPort', 0, winreg.REG_DWORD, 65534)
         winreg.SetValueEx(full_key, 'TcpMaxDataRetransmissions', 0, winreg.REG_DWORD, 5)
-        print(f'\n{bold}{cyan}[+] TCP Optimization Successful:\n\n\tTcpTimedWaitDelay Set To -> {pink}30\n\t{cyan}MaxUserPort Set To -> {pink}65534\n\t{cyan}TcpMaxDataRetransmissions Set To -> {pink}5\n')
+        winreg.SetValueEx(full_key, 'EnableLargeSendOffload', 0, winreg.REG_DWORD, 0)
+        winreg.SetValueEx(full_key, 'TcpInitialRtt', 0, winreg.REG_DWORD, 3)
+        winreg.SetValueEx(full_key, 'Tcp1323Opts', 0, winreg.REG_DWORD, 1)
+        winreg.SetValueEx(full_key, 'EnableTCPChimney', 0, winreg.REG_DWORD, 0)
+        winreg.SetValueEx(full_key, 'EnableTCPA', 0, winreg.REG_DWORD, 0)
+        winreg.SetValueEx(full_key, 'EnableRSS', 0, winreg.REG_DWORD, 1)
+        print(f'\n{bold}{cyan}[+] TCP Optimization Successful:\n\n\tTcpTimedWaitDelay Set To -> {pink}30\n\t{cyan}MaxUserPort Set To -> {pink}65534\n\t{cyan}TcpMaxDataRetransmissions Set To -> {pink}5\n\t{cyan}EnableLargeSendOffload Set To -> 0')
     except:
         print(f'\n{bold}{red}Error While Optimizing TCP.')
         return False
 
+def DisableQOS():
+    sub_key = r'SOFTWARE\Policies\Microsoft\Windows\Psched'
+    try:
+        main_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, sub_key, 0, winreg.KEY_ALL_ACCESS)
+        winreg.SetValueEx(main_key, 'NonBestEffortLimit', 0, winreg.REG_DWORD, 0)
+        print(f'\t{bold}{cyan}[+] QOS Reserved Bandwidth Set --> {pink} 0')
+    except PermissionError:
+        print(f'\t{bold}{red}Error While Disabling QoS Reserved Bandwidth')
+        return False
+    
 def GetAdapterName(subkey):
     main_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, subkey, 0, winreg.KEY_ALL_ACCESS)
     values_count = winreg.QueryInfoKey(main_key)[1]
@@ -151,7 +167,10 @@ def OptimizeActiveAdapter(transportName):
                 ('RSS', 'REG_SZ', 1),
                 ('RSSProfile', 'REG_SZ', 3),
                 ('*MaxRssProcessors', 'REG_SZ', 4),
-                ('FlowControlCap', 'REG_SZ', 0)
+                ('FlowControlCap', 'REG_SZ', 0),
+                ('*InterruptModerationRate', 'REG_SZ', 0),
+                ('*AdaptiveInterFrameSpacing', 'REG_SZ', 1),
+                ('EnablePMTUDiscovery', 'REG_DWORD', 0)
             ]
             random_times = [0.1, 0.2, 0.3, 0.01]
 
@@ -179,13 +198,16 @@ def EliminateBufferBloat():
 'PowerShell.exe Set-NetOffloadGlobalSetting -ReceiveSideScaling disabled',
 'PowerShell.exe Set-NetOffloadGlobalSetting -Chimney disabled',
 'PowerShell.exe Disable-NetAdapterLso -Name *',
-'PowerShell.exe Disable-NetAdapterChecksumOffload -Name *']
+'PowerShell.exe Disable-NetAdapterChecksumOffload -Name *', 'PowerShell.exe Set-NetTCPSetting -SettingName Datacenter -AutoTuningLevel Disabled', 'PowerShell.exe Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private',
+'PowerShell.exe ipconfig /flushdns', 'PowerShell.exe Disable-NetAdapterRsc -Name "Ethernet"']
     
     for command in commands:
         subprocess.run(command, shell=True, stdout=subprocess.PIPE, text=True)
     
-    print(f"\t{bold}{cyan}[+] AutoTuningLevelLocal Set --> {pink}Disabled")
+    print(f"\t{bold}{cyan}[+] AutoTuningLevelLocal Internet Set --> {pink}Disabled")
     time.sleep(0.1)
+    print(f"\t{bold}{cyan}[+] AutoTuningLevelLocal Datacenter Set --> {pink}Disabled")
+    time.sleep(0.2)
     print(f"\t{bold}{cyan}[+] ReceiveSegmentCoalescing Set --> {pink}Disabled")
     time.sleep(0.3)
     print(f"\t{bold}{cyan}[+] ReceiveSideScaling Set --> {pink}Disabled")
@@ -194,7 +216,35 @@ def EliminateBufferBloat():
     print(f"\t{bold}{cyan}[+] NetAdapterLso Set --> {pink}Disabled")
     print(f"\t{bold}{cyan}[+] NetAdapterChecksumOffload Set --> {pink}Disabled")
     time.sleep(0.2)
+    print(f"\t{bold}{cyan}[+] DNS Cache --> {pink}Flushed")
+    time.sleep(0.2)
     return True
+
+def FastSendDatagram():
+    sub_key = r'SYSTEM\CurrentControlSet\Services\AFD\Parameters'
+    try:
+        main_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, sub_key, 0, winreg.KEY_ALL_ACCESS)
+        winreg.SetValueEx(main_key, 'FastSendDatagramThreshold', 0, winreg.REG_DWORD, 409600)
+        print(f"\t{bold}{cyan}[+] FastSendDatagramThreshold Set --> {pink}409600")
+    except PermissionError:
+        print(f'\t{bold}{red}[-] Error: Unable To Set FastSendDatagramThreshold > Permission Denied.')
+
+def DNSCache():
+    sub_key = r'SYSTEM\CurrentControlSet\Services\Dnscache\Parameters'
+    try:
+        main_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, sub_key, 0, winreg.KEY_ALL_ACCESS)
+        winreg.SetValueEx(main_key, 'MaxCacheTtl', 0, winreg.REG_DWORD, 1)
+        winreg.SetValueEx(main_key, 'MaxNegativeCacheTtl', 0, winreg.REG_DWORD, 0)
+        print(f"\t{bold}{cyan}[+] MaxCacheTtl Set --> {pink}1\n\t{bold}{cyan}[+] MaxNegativeCacheTtl Set --> {pink}0")
+    except PermissionError:
+        print(f'\t{bold}{red}[-] Error: Unable To Set DNSCache Values > Permission Denied.')
+
+def PrioritizeInterfaceMetricForGaming():
+    try:
+        subprocess.run('powershell -Command "Set-NetIPInterface -InterfaceAlias "Ethernet" -InterfaceMetric 1"', shell=True, text=True, stdout=subprocess.PIPE)
+        print(f"\t{bold}{cyan}[+] Interface Metric For Ethernet Set --> {pink}1")
+    except:
+        print(f'\t{bold}{red}[-] Error: Unable To Prioritize "Ethernet" For Online Gaming')
 
 def GetMacAddress():
     current_ip = GetCurrentIPV4()
@@ -242,6 +292,8 @@ def main():
     OptimizeActiveAdapter(GetTransName(GetMacAddress()[1]))
     time.sleep(0.5)
     EliminateBufferBloat()
+    time.sleep(0.2)
+    FastSendDatagram()
     time.sleep(0.2)
     input('\n.............................................')
 
