@@ -100,7 +100,7 @@ def TcpOptimization():
         winreg.SetValueEx(full_key, 'EnableTCPChimney', 0, winreg.REG_DWORD, 0)
         winreg.SetValueEx(full_key, 'EnableTCPA', 0, winreg.REG_DWORD, 0)
         winreg.SetValueEx(full_key, 'EnableRSS', 0, winreg.REG_DWORD, 1)
-        print(f'\n{bold}{cyan}[+] TCP Optimization Successful:\n\n\tTcpTimedWaitDelay Set To -> {pink}30\n\t{cyan}MaxUserPort Set To -> {pink}65534\n\t{cyan}TcpMaxDataRetransmissions Set To -> {pink}5\n\t{cyan}EnableLargeSendOffload Set To -> 0')
+        print(f'\n{bold}{cyan}[+] TCP Optimization Successful:\n\n\tTcpTimedWaitDelay Set To -> {pink}30\n\t{cyan}MaxUserPort Set To -> {pink}65534\n\t{cyan}TcpMaxDataRetransmissions Set To -> {pink}5\n\t{cyan}EnableLargeSendOffload Set To -> {pink}0\n')
     except:
         print(f'\n{bold}{red}Error While Optimizing TCP.')
         return False
@@ -198,7 +198,7 @@ def EliminateBufferBloat():
 'PowerShell.exe Set-NetOffloadGlobalSetting -ReceiveSideScaling disabled',
 'PowerShell.exe Set-NetOffloadGlobalSetting -Chimney disabled',
 'PowerShell.exe Disable-NetAdapterLso -Name *',
-'PowerShell.exe Disable-NetAdapterChecksumOffload -Name *', 'PowerShell.exe Set-NetTCPSetting -SettingName Datacenter -AutoTuningLevel Disabled', 'PowerShell.exe Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private',
+'PowerShell.exe Disable-NetAdapterChecksumOffload -Name *', 'PowerShell.exe Set-NetTCPSetting -SettingName Datacenter -AutoTuningLevel Disabled',
 'PowerShell.exe ipconfig /flushdns', 'PowerShell.exe Disable-NetAdapterRsc -Name "Ethernet"']
     
     for command in commands:
@@ -245,6 +245,13 @@ def PrioritizeInterfaceMetricForGaming():
         print(f"\t{bold}{cyan}[+] Interface Metric For Ethernet Set --> {pink}1")
     except:
         print(f'\t{bold}{red}[-] Error: Unable To Prioritize "Ethernet" For Online Gaming')
+
+def SetPrivateNetwork():
+    try:
+        subprocess.run('powershell -Command "Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private"', shell=True, text=True, stdout=subprocess.PIPE)
+        print(f"\t{bold}{cyan}[+] Network Category --> {pink}Private")
+    except:
+        print(f'\t{bold}{red}[-] Error: Unable To Set Network Category to Private')
 
 def GetMacAddress():
     current_ip = GetCurrentIPV4()
@@ -294,6 +301,8 @@ def main():
     EliminateBufferBloat()
     time.sleep(0.2)
     FastSendDatagram()
+    time.sleep(0.2)
+    SetPrivateNetwork()
     time.sleep(0.2)
     DNSCache()
     time.sleep(0.2)
