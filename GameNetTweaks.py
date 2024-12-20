@@ -295,6 +295,12 @@ def main():
     time.sleep(0.2)
     FastSendDatagram()
     time.sleep(0.2)
+    DNSCache()
+    time.sleep(0.2)
+    PrioritizeInterfaceMetricForGaming()
+    time.sleep(0.3)
+    DisableQOS()
+    time.sleep(0.2)
     input('\n.............................................')
 
 if __name__ == '__main__':
