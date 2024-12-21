@@ -163,15 +163,12 @@ def OptimizeActiveAdapter(transportName):
                 ('*ReceiveBuffers', 'REG_SZ', 2048),
                 ('*TransmitBuffers', 'REG_SZ', 4096),
                 ('*FlowControl', 'REG_SZ', 0),
-                ('*RSS', 'REG_SZ', 1),
-                ('RSS', 'REG_SZ', 1),
-                ('RSSProfile', 'REG_SZ', 3),
-                ('*MaxRssProcessors', 'REG_SZ', 4),
                 ('FlowControlCap', 'REG_SZ', 0),
                 ('*InterruptModerationRate', 'REG_SZ', 0),
                 ('*AdaptiveInterFrameSpacing', 'REG_SZ', 1),
                 ('EnablePMTUDiscovery', 'REG_DWORD', 0)
             ]
+
             random_times = [0.1, 0.2, 0.3, 0.01]
 
             for i in range(0, values_count):
@@ -193,6 +190,15 @@ def OptimizeActiveAdapter(transportName):
         print(f"\t{bold}{cyan}[+] {value_name} Set --> {pink}{value_data}")
         time.sleep(random.choice(random_times))
 
+def set_priority_control():
+    sub_key = r'SYSTEM\CurrentControlSet\Control\PriorityControl'
+    try:
+        full_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, sub_key, 0 , winreg.KEY_ALL_ACCESS)
+        winreg.SetValueEx(full_key, 'Win32PrioritySeparation', 0, winreg.REG_DWORD, 56)
+        print(f"\t{bold}{cyan}[+] Win32PrioritySeparation Set To --> {pink}56 {yellow}(Optimize for foreground tasks)")
+    except PermissionError:
+        print(f'\t{bold}{red}[-] Error: Permission Denied to modify PriorityControl settings.')
+
 def EliminateBufferBloat():
     commands = ['PowerShell.exe Set-NetTCPSetting -SettingName internet -AutoTuningLevelLocal disabled', 'PowerShell.exe Set-NetOffloadGlobalSetting -ReceiveSegmentCoalescing disabled',
 'PowerShell.exe Set-NetOffloadGlobalSetting -ReceiveSideScaling disabled',
@@ -203,7 +209,7 @@ def EliminateBufferBloat():
     
     for command in commands:
         subprocess.run(command, shell=True, stdout=subprocess.PIPE, text=True)
-    
+
     print(f"\t{bold}{cyan}[+] AutoTuningLevelLocal Internet Set --> {pink}Disabled")
     time.sleep(0.1)
     print(f"\t{bold}{cyan}[+] AutoTuningLevelLocal Datacenter Set --> {pink}Disabled")
@@ -218,6 +224,7 @@ def EliminateBufferBloat():
     time.sleep(0.2)
     print(f"\t{bold}{cyan}[+] DNS Cache --> {pink}Flushed")
     time.sleep(0.2)
+
     return True
 
 def FastSendDatagram():
@@ -310,6 +317,8 @@ def main():
     time.sleep(0.3)
     DisableQOS()
     time.sleep(0.2)
+    set_priority_control()
+    time.sleep(1)
     input('\n.............................................')
 
 if __name__ == '__main__':
