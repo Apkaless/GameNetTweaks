@@ -194,8 +194,8 @@ def set_priority_control():
     sub_key = r'SYSTEM\CurrentControlSet\Control\PriorityControl'
     try:
         full_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, sub_key, 0 , winreg.KEY_ALL_ACCESS)
-        winreg.SetValueEx(full_key, 'Win32PrioritySeparation', 0, winreg.REG_DWORD, 26)
-        print(f"\t{bold}{cyan}[+] Win32PrioritySeparation Set To --> {pink}26 {yellow}(Optimize priority for foreground tasks)")
+        winreg.SetValueEx(full_key, 'Win32PrioritySeparation', 0, winreg.REG_DWORD, 42)
+        print(f"\t{bold}{cyan}[+] Win32PrioritySeparation Set To --> {pink}42 {yellow}(Optimize priority for foreground tasks)")
     except PermissionError:
         print(f'\t{bold}{red}[-] Error: Permission Denied to modify PriorityControl settings.')
 
