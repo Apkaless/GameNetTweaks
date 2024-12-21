@@ -27,8 +27,6 @@ def banner():
 {cyan}➤ {cyan}Instagram: {pink}instagram.com/apkaless
 {cyan}➤ {cyan}Credits: {pink}Apkaless
 {reset}""")
-
-
     
 def SetGPUCPUPriority(gp: int, cp: int):
     Games_subKey = r'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games'
@@ -144,6 +142,7 @@ def OptimizeActiveAdapter(transportName):
         try:
             full_main_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, full_sub_key, 0, winreg.KEY_ALL_ACCESS)
             values_count = winreg.QueryInfoKey(full_main_key)[1]
+            # Value name, Data Type, Value
             registry_values = [
                 ('*WakeOnMagicPacket', 'REG_SZ',0),
                 ('*WakeOnPattern', 'REG_SZ',0),
@@ -195,8 +194,8 @@ def set_priority_control():
     sub_key = r'SYSTEM\CurrentControlSet\Control\PriorityControl'
     try:
         full_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, sub_key, 0 , winreg.KEY_ALL_ACCESS)
-        winreg.SetValueEx(full_key, 'Win32PrioritySeparation', 0, winreg.REG_DWORD, 56)
-        print(f"\t{bold}{cyan}[+] Win32PrioritySeparation Set To --> {pink}56 {yellow}(Optimize for foreground tasks)")
+        winreg.SetValueEx(full_key, 'Win32PrioritySeparation', 0, winreg.REG_DWORD, 26)
+        print(f"\t{bold}{cyan}[+] Win32PrioritySeparation Set To --> {pink}26 {yellow}(Optimize priority for foreground tasks)")
     except PermissionError:
         print(f'\t{bold}{red}[-] Error: Permission Denied to modify PriorityControl settings.')
 
