@@ -7,7 +7,8 @@ import psutil
 import re
 import subprocess
 import random
-
+import platform
+import ctypes
 
 
 def banner():
@@ -208,7 +209,11 @@ def EliminateBufferBloat():
 'PowerShell.exe ipconfig /flushdns', 'PowerShell.exe Disable-NetAdapterRsc -Name "Ethernet"']
     
     for command in commands:
-        subprocess.run(command, shell=True, stdout=subprocess.PIPE, text=True)
+        try:
+            subprocess.run(command, shell=True, stdout=subprocess.PIPE, text=True)
+        except:
+            print(f'\t{bold}{red}[-] Unable to execute command >> {command}')
+            pass
 
     print(f"\t{bold}{cyan}[+] AutoTuningLevelLocal Internet Set --> {pink}Disabled")
     time.sleep(0.1)
@@ -269,57 +274,87 @@ def GetMacAddress():
             if current_ip in i.address:
                 return iface_name, mac_address
     else:
+        print(f'\n{bold}{red}[-] Unable to obtain The MAC Address')
+        input('\n\n>>>')
         return False
 
 def GetTransName(macAddress):
     trans_command = 'getmac'
     transport_regex = '{.+}'
-    output = subprocess.check_output(trans_command, stderr=subprocess.PIPE, shell=True, text=True)
-    results = output.split()
-    for i in results:
-        currentIndex = results.index(i)
-        if macAddress in i:
-            NoneCleantransportname = results[currentIndex + 1]
-            CleanTransName = re.search(transport_regex, NoneCleantransportname)
-            if CleanTransName:
-                return CleanTransName.group()
+    try:
+        output = subprocess.check_output(trans_command, stderr=subprocess.PIPE, shell=True, text=True)
+        results = output.split()
+        for i in results:
+            currentIndex = results.index(i)
+            if macAddress in i:
+                NoneCleantransportname = results[currentIndex + 1]
+                CleanTransName = re.search(transport_regex, NoneCleantransportname)
+                if CleanTransName:
+                    return CleanTransName.group()
+    except:
+        print(f'\n{bold}{red}[-] Unable to obtain The Transport Name')
+        input('\n\n>>>')
 
 def GetCurrentIPV4():
     socket.setdefaulttimeout(3)
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect(('8.8.8.8', 80))
-    ipv4Address = s.getsockname()[0]
-    return ipv4Address
+    try:
+        s.connect(('8.8.8.8', 80))
+        ipv4Address = s.getsockname()[0]
+        return ipv4Address
+    except:
+        print(f'\n{bold}{red}[-] Unable to obtain The IPv4 Address')
+        input('\n\n>>>')
 
+
+def is_windows():
+    return platform.system() == 'Windows'
+
+
+def is_admin():
+    try:
+        # Check for admin privileges
+        return ctypes.windll.shell32.IsUserAnAdmin() != 0
+    except Exception as e:
+        return False
 
 def main():
-    input(f"{bold}{yellow}........................[ PRESS ENTER TO LAUNCH THE TOOL ]........................{reset}")
-    time.sleep(1)
-    SetGPUCPUPriority(8, 6)
-    time.sleep(0.1)
-    DisableNaglesAlg(GetCurrentIPV4())
-    time.sleep(0.3)
-    DisableNetworkThrottling()
-    time.sleep(0.6)
-    TcpOptimization()
-    time.sleep(0.9)
-    OptimizeActiveAdapter(GetTransName(GetMacAddress()[1]))
-    time.sleep(0.5)
-    EliminateBufferBloat()
-    time.sleep(0.2)
-    FastSendDatagram()
-    time.sleep(0.2)
-    SetPrivateNetwork()
-    time.sleep(0.2)
-    DNSCache()
-    time.sleep(0.2)
-    PrioritizeInterfaceMetricForGaming()
-    time.sleep(0.3)
-    DisableQOS()
-    time.sleep(0.2)
-    set_priority_control()
-    time.sleep(1)
-    input('\n.............................................')
+    if is_windows():
+        if is_admin():
+            input(f"{bold}{yellow}........................[ PRESS ENTER TO LAUNCH THE TOOL ]........................{reset}")
+            time.sleep(1)
+            SetGPUCPUPriority(8, 6)
+            time.sleep(0.1)
+            DisableNaglesAlg(GetCurrentIPV4())
+            time.sleep(0.3)
+            DisableNetworkThrottling()
+            time.sleep(0.6)
+            TcpOptimization()
+            time.sleep(0.9)
+            OptimizeActiveAdapter(GetTransName(GetMacAddress()[1]))
+            time.sleep(0.5)
+            EliminateBufferBloat()
+            time.sleep(0.2)
+            FastSendDatagram()
+            time.sleep(0.2)
+            SetPrivateNetwork()
+            time.sleep(0.2)
+            DNSCache()
+            time.sleep(0.2)
+            PrioritizeInterfaceMetricForGaming()
+            time.sleep(0.3)
+            DisableQOS()
+            time.sleep(0.2)
+            set_priority_control()
+            time.sleep(1)
+            input('\n.............................................')
+        else:
+            print(f"\n{bold}{red}The script is not running with administrative privileges\n")
+            input('\n.............................................')
+    else:
+        print(f"\n{bold}{red}The system is not running Windows\n")
+        input('\n.............................................')
+
 
 if __name__ == '__main__':
     init(convert=True)
