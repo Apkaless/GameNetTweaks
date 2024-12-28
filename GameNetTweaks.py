@@ -334,8 +334,6 @@ def main():
             time.sleep(0.5)
             EliminateBufferBloat()
             time.sleep(0.2)
-            FastSendDatagram()
-            time.sleep(0.2)
             SetPrivateNetwork()
             time.sleep(0.2)
             DNSCache()
