@@ -231,14 +231,14 @@ def EliminateBufferBloat():
 
     return True
 
-def FastSendDatagram():
-    sub_key = r'SYSTEM\CurrentControlSet\Services\AFD\Parameters'
-    try:
-        main_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, sub_key, 0, winreg.KEY_ALL_ACCESS)
-        winreg.SetValueEx(main_key, 'FastSendDatagramThreshold', 0, winreg.REG_DWORD, 409600)
-        print(f"\t{bold}{cyan}[+] FastSendDatagramThreshold Set --> {pink}409600")
-    except PermissionError:
-        print(f'\t{bold}{red}[-] Error: Unable To Set FastSendDatagramThreshold > Permission Denied.')
+# def FastSendDatagram():   ** Do not uncomment this **
+#     sub_key = r'SYSTEM\CurrentControlSet\Services\AFD\Parameters'
+#     try:
+#         main_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, sub_key, 0, winreg.KEY_ALL_ACCESS)
+#         winreg.SetValueEx(main_key, 'FastSendDatagramThreshold', 0, winreg.REG_DWORD, 409600)
+#         print(f"\t{bold}{cyan}[+] FastSendDatagramThreshold Set --> {pink}409600")
+#     except PermissionError:
+#         print(f'\t{bold}{red}[-] Error: Unable To Set FastSendDatagramThreshold > Permission Denied.')
 
 def DNSCache():
     sub_key = r'SYSTEM\CurrentControlSet\Services\Dnscache\Parameters'
