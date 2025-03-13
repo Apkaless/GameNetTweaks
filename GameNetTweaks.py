@@ -12,7 +12,7 @@ import ctypes
 
 
 def banner():
-
+    os.system('cls')
     print(rf"""{bold}{cyan}
       ___ ___  __   __   __   __  ___  ___  __  
 |\ | |__   |  |__) /  \ /  \ /__`  |  |__  |__) 
@@ -27,7 +27,7 @@ def banner():
 {cyan}➤ {cyan}Instagram: {pink}instagram.com/apkaless
 {cyan}➤ {cyan}Credits: {pink}Apkaless
 {reset}""")
-    
+
 def SetGPUCPUPriority(gp: int, cp: int):
     Games_subKey = r'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games'
     try:
@@ -43,7 +43,7 @@ def SetGPUCPUPriority(gp: int, cp: int):
     except:
         print(f'\n{bold}{red}[-] Error: Cannot Set Data')
         return False
-    
+
 def DisableNaglesAlg(ipv4):
     active_interface_subkey = r'SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces'
     try:
@@ -309,34 +309,170 @@ def is_admin():
     except Exception as e:
         return False
 
+def restore_defaults():
+    print(f"{bold}{cyan}[+] Restoring Default Windows Settings...")
+    
+    # Restore GPU & CPU Priority
+    try:
+        Games_subKey = r'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games'
+        Games_reg = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, Games_subKey, access=winreg.KEY_ALL_ACCESS)
+        winreg.SetValueEx(Games_reg, 'GPU Priority', 0, winreg.REG_DWORD, 0)  # Default GPU Priority
+        winreg.SetValueEx(Games_reg, 'Priority', 0, winreg.REG_DWORD, 5)      # Default CPU Priority
+        print(f"{bold}{cyan}[+] Restored Default GPU & CPU Priority")
+    except Exception as e:
+        print(f"{bold}{red}[-] Error Restoring GPU & CPU Priority: {e}")
+    
+    # Restore Nagle's Algorithm
+    active_interface_subkey = r'SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces'
+    try:
+        interfaces = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, active_interface_subkey, 0, winreg.KEY_ALL_ACCESS)
+        total_interfaces = winreg.QueryInfoKey(interfaces)[0]
+        for i in range(0, total_interfaces):
+            interface = winreg.EnumKey(interfaces, i)
+            current_interface_path = f'{active_interface_subkey}\\{interface}'
+            current_interface_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, current_interface_path, 0, winreg.KEY_ALL_ACCESS)
+            winreg.DeleteValue(current_interface_key, 'TcpAckFrequency')  # Remove custom value
+            winreg.DeleteValue(current_interface_key, 'TCPNoDelay')       # Remove custom value
+        print(f"{bold}{cyan}[+] Restored Default Nagle's Algorithm Settings")
+    except Exception as e:
+        print(f"{bold}{red}[-] Error Restoring Nagle's Algorithm: {e}")
+    
+    # Restore Network Throttling
+    sub_key = r'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile'
+    try:
+        full_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, sub_key, 0, winreg.KEY_ALL_ACCESS)
+        winreg.SetValueEx(full_key, 'NetworkThrottlingIndex', 0, winreg.REG_DWORD, 0x00000014)  # Default value
+        winreg.SetValueEx(full_key, 'SystemResponsiveness', 0, winreg.REG_DWORD, 0x00000064)   # Default value
+        print(f"{bold}{cyan}[+] Restored Default Network Throttling Settings")
+    except Exception as e:
+        print(f"{bold}{red}[-] Error Restoring Network Throttling: {e}")
+    
+    # Restore TCP Optimization
+    tcp_sub_key = r'SYSTEM\CurrentControlSet\Services\Tcpip\Parameters'
+    try:
+        tcp_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, tcp_sub_key, 0, winreg.KEY_ALL_ACCESS)
+        winreg.DeleteValue(tcp_key, 'TcpTimedWaitDelay')           # Remove custom value
+        winreg.DeleteValue(tcp_key, 'MaxUserPort')                 # Remove custom value
+        winreg.DeleteValue(tcp_key, 'TcpMaxDataRetransmissions')   # Remove custom value
+        winreg.DeleteValue(tcp_key, 'EnableLargeSendOffload')      # Remove custom value
+        winreg.DeleteValue(tcp_key, 'TcpInitialRtt')               # Remove custom value
+        winreg.DeleteValue(tcp_key, 'Tcp1323Opts')                 # Remove custom value
+        winreg.DeleteValue(tcp_key, 'EnableTCPChimney')            # Remove custom value
+        winreg.DeleteValue(tcp_key, 'EnableTCPA')                  # Remove custom value
+        winreg.DeleteValue(tcp_key, 'EnableRSS')                   # Remove custom value
+        print(f"{bold}{cyan}[+] Restored Default TCP Settings")
+    except Exception as e:
+        print(f"{bold}{red}[-] Error Restoring TCP Optimization: {e}")
+    
+    # Restore QoS Reserved Bandwidth
+    qos_sub_key = r'SOFTWARE\Policies\Microsoft\Windows\Psched'
+    try:
+        qos_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, qos_sub_key, 0, winreg.KEY_ALL_ACCESS)
+        winreg.SetValueEx(qos_key, 'NonBestEffortLimit', 0, winreg.REG_DWORD, 0x00000014)  # Default value
+        print(f"{bold}{cyan}[+] Restored Default QoS Reserved Bandwidth")
+    except Exception as e:
+        print(f"{bold}{red}[-] Error Restoring QoS Settings: {e}")
+    
+    # Restore Priority Control
+    priority_sub_key = r'SYSTEM\CurrentControlSet\Control\PriorityControl'
+    try:
+        priority_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, priority_sub_key, 0, winreg.KEY_ALL_ACCESS)
+        winreg.SetValueEx(priority_key, 'Win32PrioritySeparation', 0, winreg.REG_DWORD, 0x00000002)  # Default value
+        print(f"{bold}{cyan}[+] Restored Default Priority Control Settings")
+    except Exception as e:
+        print(f"{bold}{red}[-] Error Restoring Priority Control: {e}")
+    
+    # Restore DNS Cache Settings
+    dns_sub_key = r'SYSTEM\CurrentControlSet\Services\Dnscache\Parameters'
+    try:
+        dns_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, dns_sub_key, 0, winreg.KEY_ALL_ACCESS)
+        winreg.SetValueEx(dns_key, 'MaxCacheTtl', 0, winreg.REG_DWORD, 0x00001518)         # Default value
+        winreg.SetValueEx(dns_key, 'MaxNegativeCacheTtl', 0, winreg.REG_DWORD, 0x0000012C)  # Default value
+        print(f"{bold}{cyan}[+] Restored Default DNS Cache Settings")
+    except Exception as e:
+        print(f"{bold}{red}[-] Error Restoring DNS Cache: {e}")
+    
+    # Restore PowerShell Commands
+    commands = [
+        'PowerShell.exe Set-NetTCPSetting -SettingName internet -AutoTuningLevelLocal normal',
+        'PowerShell.exe Set-NetOffloadGlobalSetting -ReceiveSegmentCoalescing enabled',
+        'PowerShell.exe Set-NetOffloadGlobalSetting -ReceiveSideScaling enabled',
+        'PowerShell.exe Set-NetOffloadGlobalSetting -Chimney automatic',
+        'PowerShell.exe Enable-NetAdapterLso -Name *',
+        'PowerShell.exe Enable-NetAdapterChecksumOffload -Name *',
+        'PowerShell.exe Set-NetTCPSetting -SettingName Datacenter -AutoTuningLevel Normal',
+        'PowerShell.exe Enable-NetAdapterRsc -Name "Ethernet"'
+    ]
+    for command in commands:
+        try:
+            subprocess.run(command, shell=True, stdout=subprocess.PIPE, text=True)
+        except Exception as e:
+            print(f"{bold}{red}[-] Unable to execute command >> {command}: {e}")
+            pass
+    print(f"{bold}{cyan}[+] Restored Default PowerShell Settings")
+    
+    # Restore Interface Metric
+    try:
+        subprocess.run('powershell -Command "Set-NetIPInterface -InterfaceAlias "Ethernet" -InterfaceMetric 25"', shell=True, text=True, stdout=subprocess.PIPE)
+        print(f"{bold}{cyan}[+] Restored Default Interface Metric")
+    except Exception as e:
+        print(f"{bold}{red}[-] Error Restoring Interface Metric: {e}")
+    
+    # Restore Network Category
+    try:
+        subprocess.run('powershell -Command "Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Public"', shell=True, text=True, stdout=subprocess.PIPE)
+        print(f"{bold}{cyan}[+] Restored Default Network Category")
+    except Exception as e:
+        print(f"{bold}{red}[-] Error Restoring Network Category: {e}")
+    
+    print(f"{bold}{green}[+] All Settings Restored to Default Windows Values")
+
+
+def run():
+    banner()
+    try:
+        target = int(input(f'''
+
+{cyan}Select Option From Below:\n\n\t{pink}1) Optimize Your Gaming Experience\n\t{pink}2) Restore Default Settings {yellow}(Select This Option When You Need To Retrive All Optimization Settings To Their Default Values)
+                    
+        {cyan}➤  {yellow}'''))
+
+        if target == 1:
+                time.sleep(1)
+                SetGPUCPUPriority(8, 6)
+                time.sleep(0.1)
+                DisableNaglesAlg(GetCurrentIPV4())
+                time.sleep(0.3)
+                DisableNetworkThrottling()
+                time.sleep(0.6)
+                TcpOptimization()
+                time.sleep(0.9)
+                OptimizeActiveAdapter(GetTransName(GetMacAddress()[1]))
+                time.sleep(0.5)
+                EliminateBufferBloat()
+                time.sleep(0.2)
+                SetPrivateNetwork()
+                time.sleep(0.2)
+                DNSCache()
+                time.sleep(0.2)
+                PrioritizeInterfaceMetricForGaming()
+                time.sleep(0.3)
+                DisableQOS()
+                time.sleep(0.2)
+                set_priority_control()
+                time.sleep(1)
+                input('\n.............................................')
+        elif target == 2:
+            restore_defaults()
+        else:
+            main()
+    except:
+        main()
+
 def main():
     if is_windows():
         if is_admin():
-            input(f"{bold}{yellow}........................[ PRESS ENTER TO LAUNCH THE TOOL ]........................{reset}")
-            time.sleep(1)
-            SetGPUCPUPriority(8, 6)
-            time.sleep(0.1)
-            DisableNaglesAlg(GetCurrentIPV4())
-            time.sleep(0.3)
-            DisableNetworkThrottling()
-            time.sleep(0.6)
-            TcpOptimization()
-            time.sleep(0.9)
-            OptimizeActiveAdapter(GetTransName(GetMacAddress()[1]))
-            time.sleep(0.5)
-            EliminateBufferBloat()
-            time.sleep(0.2)
-            SetPrivateNetwork()
-            time.sleep(0.2)
-            DNSCache()
-            time.sleep(0.2)
-            PrioritizeInterfaceMetricForGaming()
-            time.sleep(0.3)
-            DisableQOS()
-            time.sleep(0.2)
-            set_priority_control()
-            time.sleep(1)
-            input('\n.............................................')
+            run()
         else:
             print(f"\n{bold}{red}The script is not running with administrative privileges\n")
             input('\n.............................................')
@@ -354,5 +490,4 @@ if __name__ == '__main__':
     pink = '\033[95m'
     bold = '\033[1m'
     reset = '\033[0m'
-    banner()
     main()
