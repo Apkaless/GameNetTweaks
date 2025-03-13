@@ -251,7 +251,7 @@ def PrioritizeInterfaceMetricForGaming():
 
 def SetPrivateNetwork():
     try:
-        subprocess.run('powershell -Command "Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private"', shell=True, text=True, stdout=subprocess.PIPE)
+        subprocess.run('powershell -Command "Set-NetConnectionProfile -NetworkCategory Private"', shell=True, text=True, stdout=subprocess.PIPE)
         print(f"\t{bold}{cyan}[+] Network Category --> {pink}Private")
     except:
         print(f'\t{bold}{red}[-] Error: Unable To Set Network Category to Private')
