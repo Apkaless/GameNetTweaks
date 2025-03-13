@@ -433,7 +433,7 @@ def run():
     try:
         target = int(input(f'''
 
-{cyan}Select Option From Below:\n\n\t{pink}1) Optimize Your Gaming Experience\n\t{pink}2) Restore Default Settings {yellow}(Select This Option When You Need To Retrive All Optimization Settings To Their Default Values)
+{cyan}Select Option From Below:\n\n\t{yellow}1) {pink}Optimize Your Gaming Experience\n\t{yellow}2) {pink}Restore Default Settings {yellow}(Select This Option When You Need To Retrive All Optimization Settings To Their Default Values)
                     
         {cyan}➤  {yellow}'''))
 
