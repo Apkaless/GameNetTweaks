@@ -1,7 +1,7 @@
 
 # Network Optimizer for Online Gaming
 
-## Version: 1.0  
+## Version: 2.0  
 **Author**: Apkaless  
 [GitHub](https://github.com/apkaless) | [Instagram](https://instagram.com/apkaless)
 
