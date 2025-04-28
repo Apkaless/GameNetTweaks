@@ -23,9 +23,6 @@ A modern GUI tool for optimizing your Windows system for competitive online gami
 
 - Game-Specific Optimizations
   - Port Optimization
-  - Game Launcher Optimization
-  - Voice Chat Optimization
-  - Anti-Cheat Optimization
 
 ## Open Ports For These Games
 
