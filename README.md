@@ -62,7 +62,3 @@ A modern GUI tool for optimizing your Windows system for competitive online gami
 ## Disclaimer
 
 This tool modifies system settings. Use at your own risk. The developers are not responsible for any issues that may arise from using this tool.
-
-## License
-
-MIT License 
